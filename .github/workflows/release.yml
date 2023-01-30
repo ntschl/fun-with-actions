@@ -1,9 +1,4 @@
-on:
-  push:
-    paths:
-      - '/**'
-    tags:
-      - "**"
+on: [push]
 
 name: Create Release
 
