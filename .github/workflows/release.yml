@@ -1,0 +1,51 @@
+on:
+  push:
+    paths:
+      - '/**'
+    tags:
+      - "**"
+
+name: Create Release
+
+jobs:      
+  cut_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release V${{ github.run_number }}
+
+  upload:
+    name: Upload releases
+    runs-on: ubuntu-latest
+    needs: [cut_release]
+    strategy:
+      matrix:
+        version: [darwin-amd64, darwin-arm64, linux-amd64, linux-arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Releases
+        working-directory: ./cli
+        run: |
+          mkdir -p bin
+          make build-${{matrix.version}}
+
+      - name: Upload releases
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          upload_url: ${{ needs.cut_release.outputs.upload_url }}
+          asset_path: cli/bin/lightspeed-${{ matrix.version }}
+          asset_name: lightspeed-${{ matrix.version }}
+          asset_content_type: application/octet-stream
