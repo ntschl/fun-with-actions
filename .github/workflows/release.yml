@@ -17,7 +17,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${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}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
@@ -25,7 +25,6 @@ jobs:
             Changes in this Release
             - First Change
             - Second Change
-          draft: false
 
 
 
